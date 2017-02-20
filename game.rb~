@@ -1,0 +1,83 @@
+
+class Game
+  def initialize(odds_1,odds_2,odds_3,name_1,name_2)
+    @a_odds = odds_1
+    @b_odds = odds_2
+    @c_odds = odds_3
+    @comp_1 = name_1
+    @comp_2 = name_2
+    @@potential = 0
+  end
+  #a method to get the expectancy of some odds
+  def chance_of_event(string)
+    string = string.split("/")
+    return [string[0],string[1]]
+  end
+  
+  def success?
+    return @a_odds-((@b_odds+@c_odds+2)/(@b_odds*@c_odds-1))>0
+  end
+
+  def find_best_bets
+    a_low_bet = 100
+    b_low_bet = (a_low_bet*(@c_odds+1)/(@b_odds*@c_odds - 1))
+    c_low_bet = ((a_low_bet+b_low_bet)/@c_odds)
+
+    a_high_bet = 100
+    b_high_bet = (a_high_bet*(@a_odds*@c_odds-1)/(@c_odds+1))
+    c_high_bet = (@a_odds*a_high_bet - b_high_bet)
+
+    b_best = 0
+    c_best = 0
+    best_bet = 0
+    puts "b_low_bet " + b_low_bet.to_s
+    puts "b_high_bet " + b_high_bet.to_s
+    puts "c_low_bet " + c_low_bet.to_s
+    puts "c_high_bet " + c_high_bet.to_s
+    (b_low_bet..b_high_bet).step((b_high_bet-b_low_bet)/10) do |b_ex|
+      (c_low_bet..c_high_bet).step((c_high_bet-c_low_bet)/10) do |c_ex|
+        if a_low_bet*@a_odds + b_ex*@b_odds + c_ex*@c_odds - 2*(a_low_bet+b_ex+c_ex) > best_bet
+          best_bet = a_low_bet*@a_odds + b_ex*@b_odds + c_ex*@c_odds - 2*(a_low_bet+b_ex+c_ex)
+          b_best = b_ex
+          c_best = c_ex
+        end
+      end
+    end
+    @a_bet = 100
+    @b_bet = b_best
+    @c_bet = c_best
+    puts "Betting with optimal bets"
+    self.bets_breakdown
+  end
+  
+  def set_upper_bets
+    @a_bet = 100
+    @b_bet = (@a_bet*(@a_odds*@c_odds-1)/(@c_odds+1))
+    @c_bet = (@a_odds*@a_bet - @b_bet)
+  end
+  
+  def set_middle_bets
+    @a_bet = 100
+    @b_bet = ((@a_bet*(@a_odds*@c_odds-1)/(@c_odds+1) + @a_bet*(@c_odds+1)/(@b_odds*@c_odds - 1)))/2
+    @c_bet = ((@a_odds*@a_bet - @b_bet + (@a_bet+@b_bet)/@c_odds))/2
+  end
+  def set_lower_bets
+    @a_bet = 100
+    @b_bet = (@a_bet*(@c_odds+1)/(@b_odds*@c_odds - 1))
+    @c_bet = ((@a_bet+@b_bet)/@c_odds)
+  end
+  
+
+  def bets_breakdown
+    puts "Bets: "
+    puts @a_bet
+    puts @b_bet
+    puts @c_bet
+    puts "Team " + @comp_1.to_s+" wins: Win " + (@a_bet*@a_odds).to_s + ", paid "+ (@b_bet+@c_bet).to_s
+    puts "Draw:  Win " + (@b_bet*@b_odds).to_s + ", paid "+ (@a_bet+@c_bet).to_s
+    puts "Team " + @comp_2.to_s+" wins: Win " + (@c_bet*@c_odds).to_s + ", paid "+ (@a_bet+@b_bet).to_s
+    puts "Potential:"
+    puts @a_bet*@a_odds + @b_bet*@b_odds + @c_bet*@c_odds - 2*(@a_bet+@b_bet+@c_bet)
+    puts ""
+  end
+end

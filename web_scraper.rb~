@@ -1,0 +1,35 @@
+require "nokogiri"
+require 'json'
+require 'pry'
+require 'csv'
+
+require 'httparty'
+
+# requesting the page
+page = HTTParty.get('http://www.oddschecker.com/football')
+
+# making the http response into a nokogiri object
+parse_page = Nokogiri::HTML(page)
+
+# writing parsed html to file for future reference
+File.open("html", 'w'){|file| file.write(parse_page)}
+
+# array of odds
+names_array = []
+odds_array = []
+
+
+odds_html = parse_page.css(".match-on").css(".odds").map do |a|
+  odds = a.text
+  odds_array.push(odds)
+end
+
+games_html = parse_page.css(".match-on").css(".fixtures-bet-name").map do |a|
+  title = a.text
+  names_array.push(title)
+end
+
+Pry.start(binding)
+
+
+##File.open("div", "w") {|file| file.write(odds_array)}
