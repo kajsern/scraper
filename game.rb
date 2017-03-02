@@ -9,19 +9,21 @@ class Game
     @a_text_odds = text_odds_1
     @b_text_odds = text_odds_2
     @c_text_odds = text_odds_3
-    @@potential = 0
+    @potential = 0
     @A = 100
-  end
-  #a method to get the expectancy of some odds
-  def chance_of_event(string)
-    string = string.split("/")
-    return [string[0],string[1]]
   end
   
   def success?
     return @a_odds-((@b_odds+@c_odds+2)/(@b_odds*@c_odds-1))>0
   end
-
+  
+  def set_upper_bets
+    @a_bet = @A
+    @b_bet = (@a_bet*(@a_odds*@c_odds-1)/(@c_odds+1))
+    @c_bet = (@a_odds*@a_bet - @b_bet)
+  end
+  
+=begin
   def find_best_bets
     # first choose "a" as 100 because we need something to build on and we know it is >0.
     # then choose lowest "b" to compute c-bet interval.
@@ -59,15 +61,7 @@ class Game
     @c_bet = c_best
     puts "Betting with optimal bets"
     self.bets_breakdown
-  end
-
-  def set_upper_bets
-    @a_bet = @A
-    @b_bet = (@a_bet*(@a_odds*@c_odds-1)/(@c_odds+1))
-    @c_bet = (@a_odds*@a_bet - @b_bet)
-    self.bets_breakdown
-  end
-=begin  
+  end  
   def set_middle_bets
     @a_bet = @A
     @b_bet = ((@a_bet*(@a_odds*@c_odds-1)/(@c_odds+1) + @a_bet*(@c_odds+1)/(@b_odds*@c_odds - 1)))/2
@@ -84,20 +78,35 @@ class Game
     a_string = @a_text_odds.split("/")
     b_string = @b_text_odds.split("/")
     c_string = @c_text_odds.split("/")
+    
+    # dealing with single digit odds.
+    if a_string[1] == nil
+      a_string[1]="1"
+    end
+    if b_string[1] == nil
+      b_string[1]="1"
+    end
+    if c_string[1] == nil
+      c_string[1] = "1"
+    end
+    
 
-    a_event_chance = a_string[1].to_f/(a_string[0].to_f + a_string[1].to_f)
-    b_event_chance = b_string[1].to_f/(b_string[0].to_f + b_string[1].to_f)
-    c_event_chance = c_string[1].to_f/(c_string[0].to_f + c_string[1].to_f)
-
+      a_event_chance = a_string[1].to_f/(a_string[0].to_f + a_string[1].to_f)
+      b_event_chance = b_string[1].to_f/(b_string[0].to_f + b_string[1].to_f)
+      c_event_chance = c_string[1].to_f/(c_string[0].to_f + c_string[1].to_f)
+    
     # calculate expectancy
     
-    @@potential = (@a_bet*@a_odds-(@b_bet+@c_bet))*a_event_chance + (@b_bet*@b_odds - (@a_bet+@c_bet))*b_event_chance + (@c_bet*@c_odds-(@a_bet + @b_bet))*c_event_chance
+    @potential = (@a_bet*@a_odds-(@b_bet+@c_bet))*a_event_chance + (@b_bet*@b_odds - (@a_bet+@c_bet))*b_event_chance + (@c_bet*@c_odds-(@a_bet + @b_bet))*c_event_chance
   end
   def get_potential
-    return @@potential
+    return @potential
   end
   
   def bets_breakdown
+    puts @comp_1.to_s + " vs. " + @comp_2.to_s
+    puts "------------------------------"
+    
     puts "Bets: "
     puts @a_bet
     puts @b_bet
@@ -109,8 +118,7 @@ class Game
     puts "Draw: Win " + (@b_bet*@b_odds).to_s + ", paid "+ (@a_bet+@c_bet).to_s
     puts "Team " + @comp_2.to_s+" wins: Win " + (@c_bet*@c_odds).to_s + ", paid "+ (@a_bet+@b_bet).to_s
     puts "Potential:"
-    self.set_potential
-    puts @@potential
+    puts @potential
     puts ""
   end
 end

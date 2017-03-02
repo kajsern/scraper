@@ -1,0 +1,8 @@
+http://www.oddsportal.com/soccer/england/premier-league/
+artoo.scrape('.odds-nowrp a',
+{list: 'text'},
+artoo.saveCsv);
+
+artoo.scrape('.name.table-participant a',
+{list: 'text'},
+artoo.saveCsv);
